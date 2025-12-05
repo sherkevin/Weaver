@@ -123,8 +123,8 @@ class EnvironmentService:
 
         for directory in directories:
             if not directory.exists():
-            directory.mkdir(parents=True, exist_ok=True)
-            print(f"📁 Created directory: {directory}")
+                directory.mkdir(parents=True, exist_ok=True)
+                print(f"📁 Created directory: {directory}")
 
     def _init_git_repos(self, paths: Dict[str, Path], agent_names: List[str]) -> None:
         """初始化Git仓库"""
@@ -132,11 +132,11 @@ class EnvironmentService:
 
         for agent_dir in agent_dirs:
             if not (agent_dir / ".git").exists():
-            try:
-                os.system(f"git init {agent_dir} > /dev/null 2>&1")
-                print(f"🔧 Initialized Git repo: {agent_dir}")
-            except Exception as e:
-                print(f"⚠️  Failed to init Git repo {agent_dir}: {e}")
+                try:
+                    os.system(f"git init {agent_dir} > /dev/null 2>&1")
+                    print(f"🔧 Initialized Git repo: {agent_dir}")
+                except Exception as e:
+                    print(f"⚠️  Failed to init Git repo {agent_dir}: {e}")
 
     def _create_symlinks(self, paths: Dict[str, Path], agent_names: List[str]) -> None:
         """创建软链接到collab目录"""
