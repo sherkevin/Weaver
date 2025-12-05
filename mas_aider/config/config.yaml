@@ -1,0 +1,26 @@
+# 多Agent系统配置文件 - YAML格式
+# 支持变量插值: ${VAR_NAME}
+
+# 路径配置
+paths:
+  project_root: "/mnt/d/Brains/Career Brain/Infra Base/Large Language Model/Engineering Application/Agent/hello-agents/trying/langgraph"
+  framework_root: "${paths.project_root}/mas_aider"
+  workspace_root: "${paths.project_root}/workspaces"
+
+# 工作环境配置
+environment:
+  initialize: true
+  collab:
+    folder_name: collab  # 协作目录名称
+
+# Agent配置
+aider:
+  model: openai/glm-4.6
+  verbose_logging: false
+  api_key: ${oc.env:OPENAI_API_KEY}
+  api_base: ${oc.env:OPENAI_API_BASE}
+
+# 工作流配置
+workflow:
+  max_turns: 6
+

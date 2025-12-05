@@ -1,0 +1,245 @@
+# 胡辣汤PPT制作工作流 - 甲方乙方协作模式
+# 甲方提出需求，乙方制作PPT，甲方评审并给出反馈
+
+name: "hulatang"
+description: "胡辣汤宣传PPT制作工作流：甲方提出需求，乙方制作内容，甲方评审反馈"
+initial_message: "制作一份关于胡辣汤的宣传PPT"
+max_turns: 6
+
+# Agent定义
+agents:
+  - name: "client"
+    role: "甲方"
+  - name: "supplier"
+    role: "乙方"
+
+# 状态机定义
+states:
+  # 初始状态：甲方提出胡辣汤PPT需求
+  - name: "client_request"
+    agent: "client"
+    start: true  # 标记为起始状态
+    prompt: |
+      # 工作区交互指南
+      请严格遵循以下协作规则：
+      - 查看 `collab/` 目录了解项目状态
+      - 将交付物放在 `collab/` 目录
+      - 在你的个人目录中记录反思和草稿
+      - 你的响应会传递给下一个Agent
+
+      ---
+
+      你是甲方（需求提出者）。请提出制作胡辣汤宣传PPT的需求。
+
+      任务目标：{{initial_message}}
+
+      请明确说明你对胡辣汤PPT的需求：
+      1. PPT的主题和定位
+      2. 需要的页面数量
+      3. 风格要求（例如：现代、传统、卡通等）
+      4. 重点突出的内容（例如：食材、制作过程、特色等）
+      5. 任何特殊要求
+
+      **重要**：你可以查看 `collab/` 目录中的任何现有资料，你的需求和重要信息都保存在 `collab/` 目录中。
+
+      在decisions字段中明确说明：
+      - requirement_clear: 需求是否已经足够清晰
+      - budget_approved: 是否同意预算（假设预算合理）
+
+      响应格式：
+      {
+        "content": "你的需求描述",
+        "decisions": {
+          "requirement_clear": true,
+          "budget_approved": true
+        }
+      }
+
+    transitions:
+      - to: "supplier_clarify"
+        condition: "not requirement_clear"
+      - to: "supplier_create"
+        condition: "requirement_clear and budget_approved"
+
+  # 乙方澄清需求状态
+  - name: "supplier_clarify"
+    agent: "supplier"
+    prompt: |
+      # 工作区交互指南
+      请严格遵循以下协作规则：
+      - 查看 `collab/` 目录了解前一个Agent的工作
+      - 将交付物放在 `collab/` 目录
+      - 在你的个人目录中记录反思和草稿
+      - 你的响应会传递给下一个Agent
+
+      ---
+
+      你是乙方（内容制作方）。甲方已经提出了胡辣汤PPT的需求，但可能不够清晰。
+
+      请查看 `collab/` 目录中的甲方需求描述，分析哪些信息还不明确。
+
+      你可以：
+      1. 提出具体的问题，询问甲方更多细节
+      2. 提出你的理解和建议
+      3. 确认技术可行性
+
+      **重要**：将你的问题和建议保存在 `collab/` 目录中。
+
+      在decisions字段中明确说明：
+      - needs_more_info: 是否还需要更多信息
+      - ready_to_create: 是否已经可以开始制作
+
+      响应格式：
+      {
+        "content": "你的澄清问题和建议",
+        "decisions": {
+          "needs_more_info": false,
+          "ready_to_create": true
+        }
+      }
+
+    transitions:
+      - to: "client_request"
+        condition: "needs_more_info"
+      - to: "supplier_create"
+        condition: "ready_to_create"
+
+  # 乙方制作PPT状态
+  - name: "supplier_create"
+    agent: "supplier"
+    prompt: |
+      # 工作区交互指南
+      请严格遵循以下协作规则：
+      - 查看 `collab/` 目录了解前一个Agent的工作
+      - 将交付物放在 `collab/` 目录
+      - 在你的个人目录中记录反思和草稿
+      - 你的响应会传递给下一个Agent
+
+      ---
+
+      你是乙方（内容制作方）。现在开始制作胡辣汤宣传PPT。
+
+      请查看 `collab/` 目录中的：
+      1. 甲方的原始需求
+      2. 之前的澄清信息（如有）
+
+      基于这些信息，制作一份专业的胡辣汤宣传PPT。你可以：
+      1. 创建PPT文件（建议使用Markdown格式描述内容）
+      2. 设计页面布局和内容结构
+      3. 添加图片描述、文字内容
+      4. 突出胡辣汤的特色和卖点
+
+      **重要**：将PPT内容保存在 `collab/` 目录中，使用合适的格式（如 `hulatang_ppt.md`）。
+
+      在decisions字段中明确说明：
+      - content_complete: PPT内容是否制作完成
+      - quality_confidence: 1-10的制作质量自信度
+
+      响应格式：
+      {
+        "content": "PPT制作说明",
+        "decisions": {
+          "content_complete": true,
+          "quality_confidence": 8
+        }
+      }
+
+    transitions:
+      - to: "client_review"
+        condition: "content_complete"
+
+  # 甲方评审PPT状态
+  - name: "client_review"
+    agent: "client"
+    prompt: |
+      # 工作区交互指南
+      请严格遵循以下协作规则：
+      - 查看 `collab/` 目录了解前一个Agent的交付物
+      - 将评审意见放在 `collab/` 目录
+      - 在你的个人目录中记录评审反思
+      - 你的响应会传递给下一个Agent
+
+      ---
+
+      你是甲方（评审者）。请评审乙方制作的胡辣汤PPT。
+
+      请查看 `collab/` 目录中的PPT内容，仔细评估：
+      1. 是否符合你的需求
+      2. 内容质量和完整性
+      3. 设计风格是否合适
+      4. 是否突出了胡辣汤的特色
+
+      **重要**：你可以在 `collab/` 目录中添加评审意见文件。
+
+      在decisions字段中明确说明：
+      - satisfaction_score: 1-10的满意度评分
+      - needs_revision: 是否需要乙方修改
+      - approved: 是否完全满意可以直接通过
+
+      如果需要修改，请详细说明修改意见。
+
+      响应格式：
+      {
+        "content": "你的评审意见和反馈",
+        "decisions": {
+          "satisfaction_score": 7,
+          "needs_revision": true,
+          "approved": false
+        }
+      }
+
+    transitions:
+      - to: "supplier_revise"
+        condition: "needs_revision and satisfaction_score < 8"
+      - to: "END"
+        condition: "approved or satisfaction_score >= 8"
+
+  # 乙方修改PPT状态
+  - name: "supplier_revise"
+    agent: "supplier"
+    prompt: |
+      # 工作区交互指南
+      请严格遵循以下协作规则：
+      - 查看 `collab/` 目录了解前一个Agent的评审意见
+      - 将修改后的交付物放在 `collab/` 目录
+      - 在你的个人目录中记录修改思路和反思
+      - 你的响应会传递给下一个Agent
+
+      ---
+
+      你是乙方（修改者）。甲方对PPT不满意，需要修改。
+
+      请查看 `collab/` 目录中的：
+      1. 原始PPT内容
+      2. 甲方的评审反馈意见
+
+      基于甲方的反馈，修改PPT内容：
+      1. 解决甲方提出的问题
+      2. 改进不足之处
+      3. 保持专业水准
+
+      **重要**：更新 `collab/` 目录中的PPT文件，保留修改历史。
+
+      在decisions字段中明确说明：
+      - revision_complete: 修改是否完成
+      - quality_improved: 修改后的质量自信度
+
+      响应格式：
+      {
+        "content": "修改说明和改进内容",
+        "decisions": {
+          "revision_complete": true,
+          "quality_improved": 9
+        }
+      }
+
+    transitions:
+      - to: "client_review"
+        condition: "revision_complete"
+
+# 全局退出条件
+exit_conditions:
+  - condition: "turn_count >= 6"
+    action: "force_end"
+  - condition: "error_occurred"
+    action: "save_and_end"

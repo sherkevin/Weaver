@@ -1,0 +1,125 @@
+# 协作工作流配置 - 架构师和开发者协作模式
+# 支持Agent自主决策和条件分支
+
+name: "collaboration"
+description: "智能协作工作流：架构师设计，开发者实现，支持自主决策和循环优化"
+
+max_turns: 6
+
+# Agent定义
+agents:
+  - name: "architect"
+    role: "架构师"
+  - name: "developer"
+    role: "开发者"
+
+# 状态机定义
+states:
+  # 初始状态：架构师进行需求分析和架构设计
+  - name: "architect_analysis"
+    agent: "architect"
+    start: true  # 标记为起始状态
+    prompt: |
+      # 工作区交互指南
+      请严格遵循以下协作规则：
+      - 查看 `collab/` 目录了解项目状态
+      - 将交付物放在 `collab/` 目录
+      - 在你的个人目录中记录反思和草稿
+      - 你的响应会传递给下一个Agent
+
+      ---
+
+      你是项目架构师。请分析用户需求并进行架构设计。
+
+      任务目标：{{initial_message}}
+
+      请完成以下工作：
+      1. 分析需求，理解用户意图
+      2. 设计系统架构和接口
+      3. 编写初始代码框架
+
+      **重要**：你可以在 `collab/` 目录下自由创建和组织文件：
+      - 创建你认为需要的任何文件（例如：main.py, utils.py, README.md等）
+      - 决定文件命名和结构，完全自主决定
+
+      请将你的设计成果保存在 `collab/` 目录中。
+
+      在decisions字段中明确说明：
+      - needs_implementation: 是否需要开发者进一步实现代码
+      - quality_score: 1-10的架构质量评分
+      - satisfied: 是否已经满足要求可以结束
+
+      响应格式：
+      {
+        "content": "你的分析和设计说明",
+        "decisions": {
+          "needs_implementation": true/false,
+          "quality_score": 8,
+          "satisfied": false
+        }
+      }
+
+    transitions:
+      - to: "developer_implementation"
+        condition: "needs_implementation"
+      - to: "END"
+        condition: "satisfied"
+
+  # 开发者实现状态
+  - name: "developer_implementation"
+    agent: "developer"
+    prompt: |
+      # 工作区交互指南
+      请严格遵循以下协作规则：
+      - 查看 `collab/` 目录了解前一个Agent的架构设计
+      - 将代码实现放在 `collab/` 目录
+      - 在你的个人目录中记录开发反思和技术笔记
+      - 你的响应会传递给下一个Agent
+
+      ---
+
+      你是高级开发者。请根据架构师的设计实现具体代码。
+
+      任务：查看 `collab/` 目录中的架构设计，实现具体功能。
+
+      **重要**：你可以在 `collab/` 目录下：
+      - 修改现有文件
+      - 创建新的实现文件
+      - 添加测试文件
+      - 自由组织代码结构
+
+      要求：
+      1. 理解架构师的设计意图
+      2. 实现具体的业务逻辑
+      3. 确保代码质量和可维护性
+      4. 添加必要的注释和文档
+
+      请在 `collab/` 目录中完成你的工作。
+
+      在decisions字段中明确说明：
+      - needs_refinement: 是否需要架构师进一步优化设计
+      - implementation_complete: 是否实现完成
+      - quality_score: 1-10的实现质量评分
+
+      响应格式：
+      {
+        "content": "你的实现说明",
+        "decisions": {
+          "needs_refinement": false,
+          "implementation_complete": true,
+          "quality_score": 9
+        }
+      }
+
+    transitions:
+      - to: "architect_analysis"
+        condition: "needs_refinement"
+      - to: "END"
+        condition: "implementation_complete AND quality_score >= 7"
+
+# 全局退出条件
+exit_conditions:
+  - condition: "turn_count >= 6"
+    action: "force_end"
+  - condition: "error_occurred"
+    action: "save_and_end"
