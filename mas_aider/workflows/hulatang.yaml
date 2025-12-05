@@ -20,57 +20,52 @@ states:
     agent: "client"
     start: true  # 标记为起始状态
     prompt: |
+      # 角色定位
       你是甲方（需求提出者）。
 
-      任务说明：{{initial_message}}
+      # 任务说明
+      团队的任务目标是：{{initial_message}}
 
-      {{COLLABORATION_GUIDE}}
-
-      请明确说明你对胡辣汤PPT的需求：
+      请明确告诉乙方你对胡辣汤PPT的需求：
       1. PPT的主题和定位
       2. 需要的页面数量
       3. 风格要求（例如：现代、传统、卡通等）
       4. 重点突出的内容（例如：食材、制作过程、特色等）
       5. 任何特殊要求
 
-      **重要**：你可以查看 `collab/` 目录中的任何现有资料，你的需求和重要信息都保存在 `collab/` 目录中。
+      # 协作规范
+      {{COLLABORATION_GUIDE}}
 
-      响应格式：
+      # 响应格式和响应说明
+      请按照以下格式回复：
+
       {
-        "content": "你的需求描述",
-        "decisions": {
-          "requirement_clear": true,
-          "budget_approved": true
-        }
+        "content": "你的需求描述（详细说明PPT的主题、页面数量、风格要求、重点内容等）"
       }
+
+      **字段说明**：
+      - `content`：详细描述你的需求，包括所有必要信息
+      - 你的需求会被传递给乙方，由乙方判断是否需要澄清
 
     transitions:
       - to: "supplier_clarify"
-        condition: "not requirement_clear"
-      - to: "supplier_create"
-        condition: "requirement_clear and budget_approved"
+        condition: "true"  # 总是先转到乙方澄清状态，由乙方判断需求是否清晰
 
   # 乙方澄清需求状态
   - name: "supplier_clarify"
     agent: "supplier"
     prompt: |
-      # 工作区交互指南
-      请严格遵循以下协作规则：
-      - 查看 `collab/` 目录了解前一个Agent的工作
-      - 将交付物放在 `collab/` 目录
-      - 在你的个人目录中记录反思和草稿
-      - 你的响应会传递给下一个Agent
+      # 角色定位
+      你是乙方（内容制作方）。
 
-      ---
+      # 任务说明
+      甲方已经提出了胡辣汤PPT的需求，但可能不够清晰。
 
-      你是乙方（内容制作方）。甲方已经提出了胡辣汤PPT的需求，但可能不够清晰。
-
-      ## 甲方对你上次完成情况的反馈
-      **Agent**: {{last_agent_name}}
+      ## 上一轮对方的反馈
+      **对方**: {{last_agent_name}}
       **执行总结**: 
       {{last_agent_content}}
       **决策结果**: {{last_agent_decisions}}
-      ---
 
       请查看 `collab/` 目录中的甲方需求描述，分析哪些信息还不明确。
       你可以：
@@ -79,18 +74,26 @@ states:
       3. 确认技术可行性
 
       **重要**：将你的问题和建议保存在 `collab/` 目录中。
-      在decisions字段中明确说明：
-      - needs_more_info: 是否还需要更多信息
-      - ready_to_create: 是否已经可以开始制作
 
-      响应格式：
+      # 协作规范
+      {{COLLABORATION_GUIDE}}
+
+      # 响应格式和响应说明
+      请按照以下格式回复：
+
       {
-        "content": "你的澄清问题和建议",
+        "content": "你的澄清问题和建议（说明哪些信息不明确，需要甲方补充什么）",
         "decisions": {
-          "needs_more_info": false,
-          "ready_to_create": true
+          "needs_more_info": false,  // 布尔值：是否还需要更多信息，true=需要，false=不需要
+          "ready_to_create": true     // 布尔值：是否已经可以开始制作，true=可以开始，false=还需要澄清
         }
       }
+
+      **字段说明**：
+      - `content`：详细说明哪些信息不明确，需要甲方补充什么，或提出你的理解和建议
+      - `decisions.needs_more_info`：如果还需要更多信息才能开始制作，设为 true；否则设为 false
+      - `decisions.ready_to_create`：如果信息已经足够，可以开始制作，设为 true；否则设为 false
+      - 这些决策字段会影响工作流的下一步执行
 
     transitions:
       - to: "client_request"
@@ -102,13 +105,15 @@ states:
   - name: "supplier_create"
     agent: "supplier"
     prompt: |
+      # 角色定位
       你是乙方（内容制作方）。
 
-      任务说明：
-      来自 {{last_agent_name}} 的反馈：
+      # 任务说明
+      ## 上一轮对方的反馈
+      **对方**: {{last_agent_name}}
+      **执行总结**: 
       {{last_agent_content}}
-
-      {{COLLABORATION_GUIDE}}
+      **决策结果**: {{last_agent_decisions}}
 
       请查看 `collab/` 目录中的：
       1. 甲方的原始需求
@@ -122,14 +127,25 @@ states:
 
       **重要**：将PPT内容保存在 `collab/` 目录中，使用合适的格式（如 `hulatang_ppt.md`）。
 
-      响应格式：
+      # 协作规范
+      {{COLLABORATION_GUIDE}}
+
+      # 响应格式和响应说明
+      请按照以下格式回复：
+
       {
-        "content": "PPT制作说明",
+        "content": "PPT制作说明（描述你制作的内容、结构、特色等）",
         "decisions": {
-          "content_complete": true,
-          "quality_confidence": 8
+          "content_complete": true,      // 布尔值：PPT内容是否制作完成，true=完成，false=未完成
+          "quality_confidence": 8        // 整数：1-10的制作质量自信度，1=很低，10=很高
         }
       }
+
+      **字段说明**：
+      - `content`：详细描述你制作的PPT内容、结构、特色等
+      - `decisions.content_complete`：如果PPT内容已经制作完成，设为 true；否则设为 false
+      - `decisions.quality_confidence`：评估你制作的质量，给出1-10的自信度评分
+      - 这些决策字段会影响工作流的下一步执行
 
     transitions:
       - to: "client_review"
@@ -139,13 +155,15 @@ states:
   - name: "client_review"
     agent: "client"
     prompt: |
+      # 角色定位
       你是甲方（评审者）。
 
-      任务说明：
-      来自 {{last_agent_name}} 的反馈：
+      # 任务说明
+      ## 上一轮对方的反馈
+      **对方**: {{last_agent_name}}
+      **执行总结**: 
       {{last_agent_content}}
-
-      {{COLLABORATION_GUIDE}}
+      **决策结果**: {{last_agent_decisions}}
 
       请查看 `collab/` 目录中的PPT内容，仔细评估：
       1. 是否符合你的需求
@@ -155,15 +173,27 @@ states:
 
       **重要**：你可以在 `collab/` 目录中添加评审意见文件。
 
-      响应格式：
+      # 协作规范
+      {{COLLABORATION_GUIDE}}
+
+      # 响应格式和响应说明
+      请按照以下格式回复：
+
       {
-        "content": "你的评审意见和反馈",
+        "content": "你的评审意见和反馈（详细说明满意的地方和需要改进的地方）",
         "decisions": {
-          "satisfaction_score": 7,
-          "needs_revision": true,
-          "approved": false
+          "satisfaction_score": 7,    // 整数：1-10的满意度评分，1=很不满意，10=非常满意
+          "needs_revision": true,      // 布尔值：是否需要乙方修改，true=需要修改，false=不需要
+          "approved": false            // 布尔值：是否完全满意可以直接通过，true=通过，false=不通过
         }
       }
+
+      **字段说明**：
+      - `content`：详细说明你对PPT的评审意见，包括满意的地方和需要改进的地方
+      - `decisions.satisfaction_score`：给出1-10的满意度评分，1表示很不满意，10表示非常满意
+      - `decisions.needs_revision`：如果PPT需要修改，设为 true；如果已经满意，设为 false
+      - `decisions.approved`：如果PPT完全满意可以直接通过，设为 true；否则设为 false
+      - 这些决策字段会影响工作流的下一步执行
 
     transitions:
       - to: "supplier_revise"
@@ -175,13 +205,15 @@ states:
   - name: "supplier_revise"
     agent: "supplier"
     prompt: |
+      # 角色定位
       你是乙方（修改者）。
 
-      任务说明：
-      来自 {{last_agent_name}} 的反馈：
+      # 任务说明
+      ## 上一轮对方的反馈
+      **对方**: {{last_agent_name}}
+      **执行总结**: 
       {{last_agent_content}}
-
-      {{COLLABORATION_GUIDE}}
+      **决策结果**: {{last_agent_decisions}}
 
       请查看 `collab/` 目录中的：
       1. 原始PPT内容
@@ -194,14 +226,25 @@ states:
 
       **重要**：更新 `collab/` 目录中的PPT文件，保留修改历史。
 
-      响应格式：
+      # 协作规范
+      {{COLLABORATION_GUIDE}}
+
+      # 响应格式和响应说明
+      请按照以下格式回复：
+
       {
-        "content": "修改说明和改进内容",
+        "content": "修改说明和改进内容（说明你做了哪些修改，解决了哪些问题）",
         "decisions": {
-          "revision_complete": true,
-          "quality_improved": 9
+          "revision_complete": true,     // 布尔值：修改是否完成，true=完成，false=未完成
+          "quality_improved": 9          // 整数：1-10的修改后质量自信度，1=很低，10=很高
         }
       }
+
+      **字段说明**：
+      - `content`：详细说明你做了哪些修改，解决了哪些问题，改进了哪些地方
+      - `decisions.revision_complete`：如果修改已经完成，设为 true；否则设为 false
+      - `decisions.quality_improved`：评估修改后的质量，给出1-10的自信度评分
+      - 这些决策字段会影响工作流的下一步执行
 
     transitions:
       - to: "client_review"
