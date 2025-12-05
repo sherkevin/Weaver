@@ -179,11 +179,17 @@
   - `{{initial_message}}`: 工作流初始任务目标
   - `{{turn_count}}`: 当前执行轮次
   - `{{COLLABORATION_GUIDE}}`: 协作规范常量，从 workspace_interaction_guide.py 加载的字符串常量
-  - `{{last_agent_name}}`: 前一个参与者的名称，从 global_state["agent_responses"][-1]["agent"] 获取，若无则为空字符串
-  - `{{last_agent_content}}`: 前一个参与者的任务执行总结，从 global_state["agent_responses"][-1]["response"]["content"] 获取，若无则为空字符串
-  - `{{last_agent_decisions}}`: 前一个参与者的决策结果，从 global_state["agent_responses"][-1]["response"]["decisions"] 获取并转换为字符串，若无则为 "{}"
+  - `{{last_agent_name}}`: 前一个参与者的名称（增量信息/接力棒），从 global_state["agent_responses"][-1]["agent"] 获取，若无则为空字符串
+  - `{{last_agent_content}}`: 前一个参与者上一轮的响应内容（增量信息/接力棒），从 global_state["agent_responses"][-1]["response"]["content"] 获取，若无则为空字符串
+  - `{{last_agent_decisions}}`: 前一个参与者上一轮的决策结果（增量信息/接力棒），从 global_state["agent_responses"][-1]["response"]["decisions"] 获取并转换为字符串，若无则为 "{}"
 
-这些变量在 prompt 渲染时动态替换，确保参与者了解上下文和协作规则。{{COLLABORATION_GUIDE}} 提供统一的协作规范，{{last_*}} 变量提供上一轮执行的反馈和决策信息。
+**重要设计原则**：
+- `{{last_*}}` 变量只传递**增量信息**（上一轮对方刚刚说的那一句话），不是完整历史
+- 详细历史由 Aider 自动管理（通过 `cur_messages` 和 `done_messages`）
+- 文件变化由 Aider 自动感知（通过 `fnames` 和 `RepoMap`）
+- 这样设计可以避免上下文爆炸，同时充分利用 Aider 的上下文管理能力
+
+这些变量在 prompt 渲染时动态替换，确保参与者了解上下文和协作规则。{{COLLABORATION_GUIDE}} 提供统一的协作规范，{{last_*}} 变量提供上一轮执行的反馈和决策信息（增量信息）。
 - **故障场景**: 模板变量不存在会导致渲染失败，Agent 收到不完整的指令
 - **设计考量**: 模板化支持动态上下文，提高指令的适应性
 - **最佳实践**: 清晰描述任务目标、执行步骤、输出格式和决策标准
