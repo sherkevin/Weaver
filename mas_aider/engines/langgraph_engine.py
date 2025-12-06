@@ -369,8 +369,9 @@ class LangGraphEngine:
                 agent_name=agent_name,
                 prompt=f"响应内容（前500字符）: {response[:500]}..."
             )
-            try:
-                parsed = json.loads(json_match.group())
+
+        try:
+            parsed = json.loads(json_match.group())
         except json.JSONDecodeError as e:
             # JSON格式错误
             raise AgentError(
@@ -388,13 +389,13 @@ class LangGraphEngine:
             )
 
         # 确保包含content字段（如果没有，使用整个响应）
-                if "content" not in parsed:
-                    parsed["content"] = response.replace(json_match.group(), "").strip()
-            # 如果替换后为空，使用整个响应
-            if not parsed["content"]:
-                parsed["content"] = response
+        if "content" not in parsed:
+            parsed["content"] = response.replace(json_match.group(), "").strip()
+        # 如果替换后为空，使用整个响应
+        if not parsed["content"]:
+            parsed["content"] = response
 
-                return parsed
+        return parsed
     
     def _check_global_exit_conditions(self, state: WorkflowState) -> bool:
         """检查全局退出条件"""
@@ -413,8 +414,8 @@ class LangGraphEngine:
             if condition:
                 try:
                     if self.condition_evaluator.evaluate(condition, {}, condition_state, system_state):
-                self.logger.info(f"🏁 Global exit condition met: {condition}")
-                return True
+                        self.logger.info(f"🏁 Global exit condition met: {condition}")
+                        return True
                 except Exception as e:
                     self.logger.warning(f"⚠️  Failed to evaluate exit condition '{condition}': {e}")
         

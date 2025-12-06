@@ -2,6 +2,7 @@
 Agent服务 - 负责Agent的创建和管理
 """
 
+import os
 from pathlib import Path
 from typing import List, Dict, Any
 
@@ -68,24 +69,66 @@ class AgentService:
         # 2. 如果没有，则创建新实例
         logger.debug(f"🆕 Creating new agent instance: {cache_key} (type: {agent_type})")
 
-        # ✅ 让Agent可以访问collab目录，并可以在其中自由创建文件
-        # 在Python端获取目录中的所有文件，确保Aider能正确索引
-        # Aider 的 RepoMap 会包含所有文件，每次执行时会重新扫描，确保看到最新状态
+        # ✅ 仅暴露当前Agent工作区与collab软链，避免感知其他路径
+        # 预先展开文件列表，避免Aider跳过目录或误把通配符当文件名
+        agent_root = root_path
         collab_dir = workspace_info.collab_dir
 
-        # 获取目录中的所有现有文件
-        fnames_list = [str(collab_dir)]  # 包含目录本身，允许创建新文件
-        if collab_dir.exists():
-            for file_path in collab_dir.iterdir():
-                if file_path.is_file():
-                    fnames_list.append(str(file_path))
+        agent_root.mkdir(parents=True, exist_ok=True)
+        collab_dir.mkdir(parents=True, exist_ok=True)
 
-        agent = self._agent_factory.create_coder(
-            root_path=root_path,
-            fnames=fnames_list,  # ✅ 传递具体的文件路径列表
-            agent_name=agent_name,
-            type=agent_type
-        )
+        # collab为空时放置占位，确保被索引
+        if not any(collab_dir.iterdir()):
+            (collab_dir / ".keep").touch(exist_ok=True)
+
+        def _gather_files(base: Path) -> list[str]:
+            return [str(path) for path in base.rglob("*") if path.is_file()]
+
+        # 可见范围：agent根、collab软链及其下所有文件
+        # ✅ 关键修改：使用相对于agent_root的路径（即通过软链访问），而不是绝对路径
+        # 这样Aider会认为文件在Git仓库内（因为collab是仓库内的软链）
+        
+        # 1. 基础路径
+        fnames_list = [
+            str(agent_root),
+            str(agent_root / "collab"),  # 使用软链路径
+        ]
+
+        # 2. 收集agent_root下的文件（排除collab，避免重复或死循环，虽然rglob通常不跟软链）
+        for path in agent_root.rglob("*"):
+            if path.is_file() and "collab" not in path.parts:
+                fnames_list.append(str(path))
+
+        # 3. 收集collab下的文件，但转换为通过软链访问的路径
+        # workspace_info.collab_dir 是真实路径
+        # 我们需要将其转换为 agent_root / "collab" / relative_path
+        for path in collab_dir.rglob("*"):
+            if path.is_file():
+                relative_path = path.relative_to(collab_dir)
+                symlink_path = agent_root / "collab" / relative_path
+                fnames_list.append(str(symlink_path))
+
+        # 临时切换CWD以确保Aider正确识别Git根目录
+        original_cwd = os.getcwd()
+        try:
+            os.chdir(root_path)
+            
+            # 确保Git仓库已初始化（双重保险）
+            if not (root_path / ".git").exists():
+                os.system(f"git init > /dev/null 2>&1")
+                # 配置git用户，防止commit失败
+                os.system(f"git config user.email 'agent@mas-aider.ai'")
+                os.system(f"git config user.name '{agent_name}'")
+                logger.info(f"🔧 Re-initialized Git repo in {root_path}")
+
+            agent = self._agent_factory.create_coder(
+                root_path=root_path,
+                fnames=fnames_list,  # ✅ 传递具体的文件路径列表
+                agent_name=agent_name,
+                type=agent_type
+            )
+        finally:
+            os.chdir(original_cwd)
 
         # 3. 存入缓存
         self._active_agents[cache_key] = agent

@@ -21,38 +21,45 @@ states:
     start: true
     prompt: |
       你是甲方（需求方）。
-      
+
       任务目标：{{initial_message}}
-      
+
       {% if last_agent_name == "supplier" %}
       ## 乙方提出了问题和建议
-      
+
       乙方说：{{last_agent_content}}
-      
-      请直接回答乙方的问题，就像日常对话一样：
-      - 提供缺失的信息
-      - 确认或调整你的需求
-      - 回答所有澄清问题
-      
-      用自然、口语化的方式表达，不需要正式格式。
+
+      请回答乙方的问题，并更新需求文档：
+      - 在 `collab/client_requirements.md` 中记录你的回答和更新后的需求
+      - 直接回答乙方的问题
+      - 如果需求有调整，也更新到文档中
+
       {% else %}
-      请直接告诉乙方你的需求，就像日常对话一样：
-      - PPT的主题和定位
-      - 页面数量
-      - 风格要求（现代、传统、卡通等）
-      - 重点内容（食材、制作过程、特色等）
-      - 特殊要求
-      
-      用自然、口语化的方式表达，不需要正式格式。
+      请提出你的需求，并创建需求文档：
+      - 在 `collab/client_requirements.md` 中详细记录你的需求
+      - 包括：PPT主题、页面数量、风格要求、重点内容、特殊要求等
+
       {% endif %}
-      
+
+      **重要**：
+      1) 先创建/更新文件，再回复。
+      2) 创建/更新文件时请使用完整路径 + 内容的格式，确保Aider能真正写入文件：
+      ```
+      collab/client_requirements.md
+      # 这里是文件内容
+      ...
+      ```
+      （不要只在思考里描述文件，要实际写入。）
+
       {{COLLABORATION_GUIDE}}
 
-      回复格式（JSON）：
+      **回复格式（严格的JSON）**：
       {
-        "content": "你的需求或回答（自然对话风格）",
+        "content": "我已经创建了需求文档" 或 "我已经回答了问题并更新了需求文档",
         "decisions": {}
       }
+
+      **注意**：回复必须是JSON格式，不要包含文件内容！
 
     transitions:
       - to: "supplier_discuss"
@@ -65,25 +72,31 @@ states:
       你是乙方（开发者/设计师）。
 
       甲方说：{{last_agent_content}}
-      
-      请与甲方讨论PPT的设计方案，就像同事之间的对话：
+
+      请与甲方讨论PPT的设计方案：
       - 提出你的设计思路和建议
       - 询问不确定的地方
       - 讨论技术实现方案（HTML PPT的结构、样式、交互等）
       - 确认关键细节
-      
-      用自然、专业的对话方式，不要写正式邮件。
-      
+
+      **关键**：
+      - 如果甲方明确表示“方案通过”或“开始制作”，或者你认为需求已经足够清晰，请务必将 `design_confirmed` 和 `ready_to_build` 设置为 true，以便进入制作阶段。
+      - 不要陷入无休止的讨论。
+
+      如果需要记录设计方案，在 `collab/` 目录创建相关文档。
+
       {{COLLABORATION_GUIDE}}
 
-      回复格式（JSON）：
+      **回复格式（严格的JSON）**：
       {
-        "content": "你的讨论内容（对话风格，可以提问、建议、确认）",
+        "content": "我提出了设计方案，询问了XXX问题",
         "decisions": {
           "design_confirmed": false,  // 设计方案是否已确认
           "ready_to_build": false     // 是否可以开始制作
         }
       }
+
+      **注意**：回复必须是JSON格式，不要包含文件内容！
 
     transitions:
       - to: "client_discuss"
@@ -96,24 +109,32 @@ states:
     agent: "client"
     prompt: |
       你是甲方。
-      
+
       乙方说：{{last_agent_content}}
-      
-      请直接回复，就像日常讨论：
+
+      请回复乙方的问题并确认方案：
       - 回答乙方的问题
       - 表达你的想法和偏好
       - 确认或调整方案
       - 提出你的建议
-      
-      用自然对话的方式，不需要正式格式。
-      
+
+      **关键**：
+      - 如果乙方的方案基本符合要求，请明确回复“方案通过，请开始制作”，不要纠结过多细节，以推进项目进度。
+      - 只有在方案有重大缺陷时才继续讨论。
+
+      如果需要更新需求，在 `collab/client_requirements.md` 中记录调整。
+
       {{COLLABORATION_GUIDE}}
-      
-      回复格式（JSON）：
+
+      **回复格式（严格的JSON）**：
       {
-        "content": "你的回复（自然对话）",
-        "decisions": {}
+        "content": "我回答了问题，确认了方案",
+        "decisions": {
+            "approve_design": true  // 如果同意方案，请设为true
+        }
       }
+
+      **注意**：回复必须是JSON格式，不要包含文件内容！
 
     transitions:
       - to: "supplier_discuss"
@@ -123,13 +144,15 @@ states:
   - name: "supplier_create"
     agent: "supplier"
     prompt: |
+      **⚠️ 重要：你必须以JSON格式回复**
+
       你是乙方（开发者）。
 
       经过讨论，方案已确认。之前的对话：
       {{last_agent_content}}
-      
-      **你的任务：制作HTML PPT**
-      
+
+      **你的任务：制作HTML PPT并创建交付物**
+
       1. **创建HTML文件**：在 `collab/` 目录创建 `hulatang_ppt.html`
       2. **实现PPT功能**：
          - 使用HTML + CSS + JavaScript
@@ -137,19 +160,31 @@ states:
          - 响应式设计，适配不同屏幕
          - 美观的视觉效果和动画
       3. **内容要求**：
-         - 根据甲方需求和讨论结果制作内容
+         - 根据甲方需求制作内容
          - 包含封面、内容页（至少5-8页）、结尾页
          - 突出胡辣汤的特色（历史、食材、制作、文化等）
-         - 使用合适的图片、颜色、字体
-      4. **创建使用说明**：在 `collab/` 创建 `README.md`，说明如何打开和使用PPT
-      
-      **重要**：必须生成完整的HTML代码文件，不要只是描述。代码要可以直接运行。
+      4. **创建使用说明**：在 `collab/` 创建 `README.md`
+
+      **重要**：
+      1) 先创建/更新文件，然后再回复JSON。
+      2) 创建/更新文件时请使用完整路径 + 内容的格式，确保Aider真正写入文件：
+      ```
+      collab/hulatang_ppt.html
+      <!-- 这里是完整的HTML代码 -->
+      ...
+      ```
+      ```
+      collab/README.md
+      # 使用说明
+      ...
+      ```
+      （不要只在思考里描述文件，要实际写入。）
 
       {{COLLABORATION_GUIDE}}
 
-      **⚠️ 严格要求**：完成文件创建后，必须以JSON格式回复。格式如下：
+      **回复格式（严格的JSON）**：
       {
-        "content": "制作说明：我创建了HTML PPT文件和使用说明，包含X页内容，实现了Y功能...",
+        "content": "我已经创建了HTML PPT文件和使用说明",
         "decisions": {
           "html_created": true,
           "ppt_complete": true,
@@ -157,7 +192,7 @@ states:
         }
       }
 
-      **注意**：即使你已经创建了文件，也必须输出这个JSON格式的响应！这是工作流继续的关键。
+      **注意**：回复必须是JSON格式，不要包含文件内容！
 
     transitions:
       - to: "client_review"

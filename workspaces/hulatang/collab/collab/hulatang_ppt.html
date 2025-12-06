@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hulatang - The Soul of Central China's Breakfast</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/theme/white.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-red: #D32F2F;
+            --primary-brown: #5D4037;
+            --primary-orange: #FF6F00;
+            --text-dark: #212121;
+            --text-light: #757575;
+            --bg-light: #FFF3E0;
+        }
+
+        body {
+            font-family: 'Montserrat', 'Noto Sans SC', sans-serif;
+        }
+
+        .reveal {
+            color: var(--text-dark);
+        }
+
+        .reveal .slides section {
+            text-align: left;
+        }
+
+        .reveal h1, .reveal h2, .reveal h3 {
+            color: var(--primary-red);
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .reveal h1 {
+            font-size: 3em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .reveal h2 {
+            font-size: 2.5em;
+        }
+
+        .reveal h3 {
+            font-size: 1.8em;
+            color: var(--primary-brown);
+        }
+
+        .chinese-text {
+            font-family: 'Noto Sans SC', sans-serif;
+            font-weight: 500;
+        }
+
+        .title-slide {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-orange));
+            color: white;
+            text-align: center;
+        }
+
+        .title-slide h1 {
+            color: white;
+            font-size: 3.5em;
+            margin-bottom: 0.5rem;
+        }
+
+        .title-slide .tagline {
+            font-size: 1.5em;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            color: rgba(255,255,255,0.9);
+        }
+
+        .title-slide .chinese-title {
+            font-size: 2.5em;
+            margin-top: 1rem;
+            font-weight: 700;
+        }
+
+        .content-slide {
+            padding: 2rem;
+        }
+
+        .highlight-box {
+            background: var(--bg-light);
+            border-left: 5px solid var(--primary-orange);
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 5px;
+        }
+
+        .ingredient-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .ingredient-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .ingredient-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .ingredient-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .process-step {
+            display: flex;
+            align-items: center;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: rgba(255,111,0,0.05);
+            border-radius: 8px;
+        }
+
+        .step-number {
+            background: var(--primary-orange);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .flavor-profile {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .flavor-item {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, rgba(211,47,47,0.1), rgba(255,111,0,0.1));
+            border-radius: 10px;
+        }
+
+        .flavor-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary-red), var(--primary-orange));
+            color: white;
+            padding: 3rem;
+            border-radius: 15px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .cta-section h2 {
+            color: white;
+        }
+
+        .contact-info {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .contact-item {
+            text-align: center;
+        }
+
+        .qr-placeholder {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border: 2px dashed var(--primary-brown);
+            display: inline-block;
+            margin: 1rem 0;
+            border-radius: 10px;
+            line-height: 120px;
+            text-align: center;
+            color: var(--primary-brown);
+        }
+
+        .image-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 1.2rem;
+            margin: 1.5rem 0;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .testimonial {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin: 1rem 0;
+            border-left: 4px solid var(--primary-orange);
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: var(--primary-brown);
+            margin-top: 0.5rem;
+        }
+
+        .promotion-card {
+            background: linear-gradient(135deg, var(--primary-orange), var(--primary-red));
+            color: white;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .promotion-title {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .reveal .progress {
+            color: var(--primary-orange);
+        }
+
+        .reveal .controls button {
+            color: var(--primary-red);
+        }
+
+        @media (max-width: 768px) {
+            .ingredient-grid,
+            .flavor-profile,
+            .contact-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .reveal h1 {
+                font-size: 2.5em;
+            }
+            
+            .reveal h2 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="reveal">
+        <div class="slides">
+            <!-- Title Slide -->
+            <section class="title-slide">
+                <h1>Hulatang</h1>
+                <div class="chinese-title">胡辣汤</div>
+                <div class="tagline">Wake Up Your Senses</div>
+                <p class="chinese-text">中原早餐的灵魂</p>
+            </section>
+
+            <!-- Introduction -->
+            <section class="content-slide">
+                <h2>What is Hulatang?</h2>
+                <div class="two-column">
+                    <div>
+                        <div class="image-placeholder">
+                            🍲 Hulatang Bowl Image
+                        </div>
+                    </div>
+                    <div>
+                        <div class="highlight-box">
+                            <h3>More Than Just Soup</h3>
+                            <p>Hulatang is a traditional Chinese spicy soup that has been the heart of Central China's breakfast culture for centuries.</p>
+                        </div>
+                        <ul>
+                            <li><strong>Origin:</strong> Henan Province, Central China</li>
+                            <li><strong>History:</strong> Over 800 years of tradition</li>
+                            <li><strong>Cultural Significance:</strong> Daily morning ritual</li>
+                            <li><strong>Character:</strong> Spicy, savory, complex flavors</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- The Perfect Bowl -->
+            <section class="content-slide">
+                <h2>The Perfect Bowl</h2>
+                <h3>Key Ingredients</h3>
+                <div class="ingredient-grid">
+                    <div class="ingredient-card">
+                        <div class="ingredient-icon">🥩</div>
+                        <h4>Beef</h4>
+                        <p>Tender slices of premium beef</p>
+                    </div>
+                    <div class="ingredient-card">
+                        <div class="ingredient-icon">🌾</div>
+                        <h4>Wheat Gluten</h4>
+                        <p>Chewy, protein-rich texture</p>
+                    </div>
+                    <div class="ingredient-card">
+                        <div class="ingredient-icon">🍄</div>
+                        <h4>Wood Ear Mushrooms</h4>
+                        <p>Earthy flavor, crisp texture</p>
+                    </div>
+                    <div class="ingredient-card">
+                        <div class="ingredient-icon">🥜</div>
+                        <h4>Peanuts</h4>
+                        <p>Nutty crunch and richness</p>
+                    </div>
+                    <div class="ingredient-card">
+                        <div class="ingredient-icon">🌶️</div>
+                        <h4>Chili Oil</h4>
+                        <p>Aromatic heat and spice</p>
+                    </div>
+                    <div class="ingredient-card">
+                        <div class="ingredient-icon">🌿</div>
+                        <h4>Herbs &amp; Spices</h4>
+                        <p>Secret blend of 13 spices</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Making Process -->
+            <section class="content-slide">
+                <h2>Traditional Making Process</h2>
+                <div class="process-step">
+                    <div class="step-number">1</div>
+                    <div>
+                        <h3>Broth Preparation</h3>
+                        <p>Slow-cooked beef bones for 6+ hours to create rich, flavorful base</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">2</div>
+                    <div>
+                        <h3>Ingredient Preparation</h3>
+                        <p>Fresh ingredients hand-cut to perfect sizes for optimal texture</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">3</div>
+                    <div>
+                        <h3>Spice Blending</h3>
+                        <p>Traditional 13-spice mixture toasted and ground fresh daily</p>
+                    </div>
+                </div>
+                <div class="process-step">
+                    <div class="step-number">4</div>
+                    <div>
+                        <h3>Final Assembly</h3>
+                        <p>Ingredients combined at precise moments for perfect harmony</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Flavor Profile -->
+            <section class="content-slide">
+                <h2>Flavor Profile</h2>
+                <div class="flavor-profile">
+                    <div class="flavor-item">
+                        <div class="flavor-icon">🌶️</div>
+                        <h3>Spicy</h3>
+                        <p>Complex heat from multiple chili varieties</p>
+                    </div>
+                    <div class="flavor-item">
+                        <div class="flavor-icon">🧂</div>
+                        <h3>Savory</h3>
+                        <p>Deep umami from slow-cooked broth</p>
+                    </div>
+                    <div class="flavor-item">
+                        <div class="flavor-icon">🌿</div>
+                        <h3>Aromatic</h3>
+                        <p>Fragrant spices and fresh herbs</p>
+                    </div>
+                </div>
+                <div class="highlight-box">
+                    <h3>Texture Experience</h3>
+                    <p>Every spoonful offers a journey through different textures - tender meat, chewy gluten, crisp vegetables, and smooth broth</p>
+                </div>
+            </section>
+
+            <!-- Cultural Significance -->
+            <section class="content-slide">
+                <h2>Cultural Significance</h2>
+                <div class="two-column">
+                    <div>
+                        <h3>Morning Ritual</h3>
+                        <p>In Central China, Hulatang isn't just breakfast - it's a daily tradition that brings communities together.</p>
+                        <ul>
+                            <li>Social gathering point</li>
+                            <li>Start to a productive day</li>
+                            <li>Passing down traditions</li>
+                            <li>Regional pride</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <div class="image-placeholder">
+                            🏮 Cultural Scene Image
+                        </div>
+                        <div class="highlight-box">
+                            <p class="chinese-text">"一日之计在于晨，一晨之计在于汤"</p>
+                            <p><em>"The day's plan starts in the morning, the morning starts with soup"</em></p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Health Benefits -->
+            <section class="content-slide">
+                <h2>Health Benefits</h2>
+                <div class="two-column">
+                    <div>
+                        <h3>Nutritional Value</h3>
+                        <ul>
+                            <li><strong>High Protein:</strong> 25g per serving</li>
+                            <li><strong>Rich in Collagen:</strong> From slow-cooked bones</li>
+                            <li><strong>Vitamins &amp; Minerals:</strong> B vitamins, iron, zinc</li>
+                            <li><strong>Low Fat:</strong> Only 8g per serving</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Traditional Benefits</h3>
+                        <div class="highlight-box">
+                            <h4>Warming Properties</h4>
+                            <p>According to Traditional Chinese Medicine, Hulatang helps:</p>
+                            <ul>
+                                <li>Boost circulation</li>
+                                <li>Strengthen immunity</li>
+                                <li>Increase energy levels</li>
+                                <li>Aid digestion</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Serving Suggestions -->
+            <section class="content-slide">
+                <h2>Serving Suggestions</h2>
+                <div class="two-column">
+                    <div>
+                        <h3>Traditional Pairings</h3>
+                        <ul>
+                            <li><strong>Youtiao:</strong> Fried dough sticks</li>
+                            <li><strong>Baozi:</strong> Steamed buns</li>
+                            <li><strong>Shaobing:</strong> Flaky flatbread</li>
+                            <li><strong>Pickled Vegetables:</strong> For balance</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Modern Twists</h3>
+                        <ul>
+                            <li><strong>Bowl Format:</strong> For office lunch</li>
+                            <li><strong>Grab &amp; Go:</strong> Convenient packaging</li>
+                            <li><strong>Custom Spice Levels:</strong> Mild to extra hot</li>
+                            <li><strong>Protein Options:</strong> Beef, chicken, vegetarian</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="highlight-box">
+                    <h3>Best Times to Enjoy</h3>
+                    <p>Traditional: 6:00-10:00 AM | Modern: Any time you need warmth and energy!</p>
+                </div>
+            </section>
+
+            <!-- Customer Experience -->
+            <section class="content-slide">
+                <h2>Customer Experience</h2>
+                <div class="testimonial">
+                    <p>"The best Hulatang I've had outside of Henan! The authentic flavor takes me back to my childhood mornings."</p>
+                    <div class="testimonial-author">- Li Wei, Regular Customer</div>
+                </div>
+                <div class="testimonial">
+                    <p>"As someone new to Chinese breakfast culture, Hulatang was a revelation. Complex, comforting, and addictive!"</p>
+                    <div class="testimonial-author">- Sarah Johnson, Food Blogger</div>
+                </div>
+                <div class="two-column">
+                    <div>
+                        <h3>Social Media Presence</h3>
+                        <p>Join our community of Hulatang lovers!</p>
+                        <ul>
+                            <li>Instagram: @hulatang_official</li>
+                            <li>WeChat: HulatangDaily</li>
+                            <li>TikTok: #HulatangChallenge</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Community Events</h3>
+                        <ul>
+                            <li>Monthly tasting events</li>
+                            <li>Cooking workshops</li>
+                            <li>Cultural festivals</li>
+                            <li>Loyalty rewards program</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Locations & Availability -->
+            <section class="content-slide">
+                <h2>Locations &amp; Availability</h2>
+                <div class="two-column">
+                    <div>
+                        <h3>Store Locations</h3>
+                        <ul>
+                            <li><strong>Downtown:</strong> 123 Main Street</li>
+                            <li><strong>Chinatown:</strong> 456 Cultural Ave</li>
+                            <li><strong>University:</strong> 789 Campus Drive</li>
+                            <li><strong>Suburbs:</strong> 321 Family Plaza</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3>Operating Hours</h3>
+                        <ul>
+                            <li><strong>Mon-Fri:</strong> 6:00 AM - 2:00 PM</li>
+                            <li><strong>Sat-Sun:</strong> 7:00 AM - 3:00 PM</li>
+                            <li><strong>Holidays:</strong> 8:00 AM - 1:00 PM</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="highlight-box">
+                    <h3>Delivery Options</h3>
+                    <p>Available on: Uber Eats, DoorDash, Grubhub, and our own app with exclusive discounts!</p>
+                </div>
+            </section>
+
+            <!-- Special Promotions -->
+            <section class="content-slide">
+                <h2>Special Promotions</h2>
+                <div class="promotion-card">
+                    <div class="promotion-title">Morning Rush Special</div>
+                    <p>20% off before 7:00 AM</p>
+                </div>
+                <div class="promotion-card">
+                    <div class="promotion-title">Loyalty Program</div>
+                    <p>Buy 9 bowls, get the 10th FREE!</p>
+                </div>
+                <div class="promotion-card">
+                    <div class="promotion-title">Group Discount</div>
+                    <p>15% off for groups of 5+</p>
+                </div>
+                <div class="highlight-box">
+                    <h3>Limited Time Offer</h3>
+                    <p>Try our new "Spicy Challenge" - Finish our extra hot Hulatang in 10 minutes and get it free + a t-shirt!</p>
+                </div>
+            </section>
+
+            <!-- Call to Action -->
+            <section class="content-slide">
+                <div class="cta-section">
+                    <h2>Visit Us Today!</h2>
+                    <p>Experience the authentic taste of Central China's breakfast culture</p>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <h3>Follow Us</h3>
+                            <div class="qr-placeholder">QR Code</div>
+                            <p>@hulatang_official</p>
+                        </div>
+                        <div class="contact-item">
+                            <h3>Order Online</h3>
+                            <div class="qr-placeholder">QR Code</div>
+                            <p>Scan to order</p>
+                        </div>
+                        <div class="contact-item">
+                            <h3>Join VIP</h3>
+                            <div class="qr-placeholder">QR Code</div>
+                            <p>Exclusive benefits</p>
+                        </div>
+                    </div>
+                    <p style="margin-top: 2rem; font-size: 1.2em;">
+                        <strong>Phone:</strong> (555) 123-4567<br>
+                        <strong>Email:</strong> hello@hulatang.com<br>
+                        <strong>Website:</strong> www.hulatang.com
+                    </p>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/reveal.js/4.3.1/reveal.js"></script>
+    <script>
+        // Initialize Reveal.js
+        Reveal.initialize({
+            hash: true,
+            controls: true,
+            progress: true,
+            center: false,
+            transition: 'slide',
+            transitionSpeed: 'slow',
+            backgroundTransition: 'fade',
+            
+            // Keyboard navigation
+            keyboard: {
+                37: 'left',  // Arrow left
+                39: 'right', // Arrow right
+                38: 'up',    // Arrow up
+                40: 'down',  // Arrow down
+                32: null,    // Space disabled
+                13: 'next',  // Enter
+                27: null     // Escape disabled
+            },
+            
+            // Touch navigation
+            touch: true,
+            
+            // Loop presentation
+            loop: false,
+            
+            // RTL support
+            rtl: false,
+            
+            // Navigation mode
+            navigationMode: 'default',
+            
+            // Shuffle slides
+            shuffle: false,
+            
+            // Embedded media
+            embedded: false,
+            
+            // Help overlay
+            help: true,
+            
+            // Mouse wheel navigation
+            mouseWheel: false,
+            
+            // Preview links
+            previewLinks: false,
+            
+            // Auto-slide
+            autoSlide: 0,
+            autoSlideStoppable: true,
+            
+            // Slide number
+            slideNumber: false,
+            
+            // Show notes
+            showNotes: false,
+            
+            // Width and height
+            width: 1920,
+            height: 1080,
+            
+            // Scale
+            minScale: 0.2,
+            maxScale: 2.0,
+            
+            // Parallax background
+            parallaxBackgroundImage: '',
+            parallaxBackgroundSize: '',
+            parallaxBackgroundHorizontal: 0,
+            parallaxBackgroundVertical: 0,
+            
+            // Display
+            display: 'block'
+        });
+
+        // Add custom animations
+        document.addEventListener('DOMContentLoaded', function() {
+            // Animate ingredient cards on hover
+            const cards = document.querySelectorAll('.ingredient-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px) scale(1.05)';
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0) scale(1)';
+                });
+            });
+
+            // Add smooth scroll behavior
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // Add fade-in animation to sections
+            const sections = document.querySelectorAll('section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            sections.forEach(section => {
+                section.style.opacity = '0';
+                section.style.transform = 'translateY(20px)';
+                section.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+                observer.observe(section);
+            });
+        });
+
+        // Add keyboard shortcuts info
+        Reveal.addEventListener('ready', function(event) {
+            console.log('Hulatang Presentation Ready!');
+            console.log('Navigation: Arrow keys or click to advance');
+            console.log('Press ESC for overview');
+        });
+    </script>
+</body>
+</html>

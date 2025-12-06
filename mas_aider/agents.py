@@ -7,10 +7,17 @@ from aider.io import InputOutput
 class AiderAgentFactory:
     def __init__(self, model_name="openai/glm-4.6", api_base=None):
         self.model_name = model_name
+        import os
         if api_base:
-            import os
             os.environ["OPENAI_BASE_URL"] = api_base
+
+        # 创建Model实例
         self.model = Model(model_name)
+
+        # 修改Aider的默认request_timeout从600秒增加到1800秒（30分钟）
+        # 这样可以确保长回复任务有足够的时间完成
+        import aider.models
+        aider.models.request_timeout = 1800
 
     # Agent类型映射表，用于选择不同的Coder实现
     CODER_TYPES = {

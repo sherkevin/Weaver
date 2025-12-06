@@ -125,6 +125,10 @@ class EnvironmentService:
             if not directory.exists():
                 directory.mkdir(parents=True, exist_ok=True)
                 print(f"📁 Created directory: {directory}")
+        # collab 目录占位，避免空目录被跳过
+        collab_dir = paths["collab_dir"]
+        if collab_dir.exists() and not any(collab_dir.iterdir()):
+            (collab_dir / ".keep").touch(exist_ok=True)
 
     def _init_git_repos(self, paths: Dict[str, Path], agent_names: List[str]) -> None:
         """初始化Git仓库"""
@@ -134,6 +138,9 @@ class EnvironmentService:
             if not (agent_dir / ".git").exists():
                 try:
                     os.system(f"git init {agent_dir} > /dev/null 2>&1")
+                    # 配置git用户，防止commit失败
+                    os.system(f"cd {agent_dir} && git config user.email 'agent@mas-aider.ai'")
+                    os.system(f"cd {agent_dir} && git config user.name 'MasAider Agent'")
                     print(f"🔧 Initialized Git repo: {agent_dir}")
                 except Exception as e:
                     print(f"⚠️  Failed to init Git repo {agent_dir}: {e}")
@@ -145,12 +152,23 @@ class EnvironmentService:
 
         for agent_dir in agent_dirs:
             symlink_path = agent_dir / self.config.environment.collab.folder_name
-            if symlink_path.exists():
-                symlink_path.unlink()
+            if symlink_path.exists() or symlink_path.is_symlink():
+                if symlink_path.is_dir() and not symlink_path.is_symlink():
+                    shutil.rmtree(symlink_path)
+                else:
+                    symlink_path.unlink()
 
             try:
-                symlink_path.symlink_to(collab_dir.resolve())
+                symlink_path.symlink_to(collab_dir.resolve(), target_is_directory=True)
                 print(f"🔗 Created symlink: {symlink_path} -> {collab_dir}")
             except Exception as e:
                 print(f"⚠️  Failed to create symlink {symlink_path}: {e}")
+                continue
+
+            # 校验软链指向
+            try:
+                if symlink_path.resolve() != collab_dir.resolve():
+                    print(f"⚠️  Symlink points to wrong target: {symlink_path} -> {symlink_path.resolve()}")
+            except Exception as e:
+                print(f"⚠️  Failed to resolve symlink {symlink_path}: {e}")
 
