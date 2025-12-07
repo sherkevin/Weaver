@@ -146,10 +146,10 @@ class EnvironmentService:
     @safe_operation(log_error=True)
     def _init_single_git_repo(self, agent_dir: Path) -> None:
         """初始化单个Git仓库"""
-        os.system(f"git init {agent_dir} > /dev/null 2>&1")
+        os.system(f"git init '{agent_dir}' > /dev/null 2>&1")
         # 配置git用户，防止commit失败
-        os.system(f"cd {agent_dir} && git config user.email 'agent@mas-aider.ai'")
-        os.system(f"cd {agent_dir} && git config user.name 'MasAider Agent'")
+        os.system(f"cd '{agent_dir}' && git config user.email 'agent@mas-aider.ai'")
+        os.system(f"cd '{agent_dir}' && git config user.name 'MasAider Agent'")
         print(f"🔧 Initialized Git repo: {agent_dir}")
 
     def _create_symlinks(self, paths: Dict[str, Path], agent_names: List[str]) -> None:

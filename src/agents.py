@@ -1,4 +1,5 @@
 # agents.py
+import os
 from pathlib import Path
 from aider.coders import Coder, ArchitectCoder, AskCoder
 from aider.models import Model
@@ -66,11 +67,21 @@ class AiderAgentFactory:
         CoderClass = self.CODER_TYPES.get(type, Coder)
 
         # 4. 创建 Coder - 使用绝对路径，确保所有操作都在workspace下
-        coder = CoderClass.create(
-            main_model=self.model,
-            io=io,
-            fnames=fnames,  # 现在是绝对路径
-            verbose=True,   # 关键：开启详细模式，出错时能看到原因
-            **kwargs        # 透传其他参数，如 edit_format="whole"
-        )
+        # 修复：临时切换 CWD 到 agent 目录，确保 Aider 识别正确的 Git 根目录
+        original_cwd = os.getcwd()
+        try:
+            os.chdir(root_path)
+            
+            coder = CoderClass.create(
+                main_model=self.model,
+                io=io,
+                fnames=fnames,  # 现在是绝对路径
+                verbose=True,   # 关键：开启详细模式，出错时能看到原因
+                # root=str(root_path), # 删除不支持的参数
+                **kwargs        # 透传其他参数，如 edit_format="whole"
+            )
+        finally:
+            # 恢复工作目录，避免影响其他组件
+            os.chdir(original_cwd)
+            
         return coder
