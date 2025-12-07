@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="pic/logo.png" alt="Weaver Logo" width="200"/>
+<img src="pic/logo.png" alt="Weaver Logo" width="600"/>
 
 # 🕷️ Weaver
 
