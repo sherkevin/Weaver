@@ -144,15 +144,21 @@ class WorkflowFactory:
             str: 初始消息
         """
         try:
-            # 尝试从 ConfigWorkflow 获取
+            # 优化：直接使用 ConfigWorkflow 的静态方法或轻量级方式获取配置
+            # 这里我们暂时保留实例化方式，但建议后续重构 ConfigWorkflow 以支持静态配置读取
             dummy_context = WorkflowContext(
                 workflow_name=workflow_name,
                 config=None,
                 initial_message=""
             )
+            # 避免完全初始化，只做配置加载
             config_workflow = ConfigWorkflow(dummy_context)
-            config = config_workflow.config
-            return config.get("initial_message", f"Start {workflow_name} workflow")
-        except:
+            # 强制加载配置（如果尚未加载）
+            if not hasattr(config_workflow, 'config') or not config_workflow.config:
+                 config_workflow.config = config_workflow._load_config()
+            
+            return config_workflow.config.get("initial_message", f"Start {workflow_name} workflow")
+        except Exception as e:
+            print(f"⚠️  Could not load initial message for {workflow_name}: {e}")
             # 如果获取失败，返回默认消息
             return f"Start {workflow_name} workflow"

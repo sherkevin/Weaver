@@ -4,7 +4,7 @@
 # 路径配置
 paths:
   project_root: "/mnt/d/Brains/Career Brain/Infra Base/Large Language Model/Engineering Application/Agent/hello-agents/trying/langgraph"
-  framework_root: "${paths.project_root}/mas_aider"
+  framework_root: "${paths.project_root}/src"
   workspace_root: "${paths.project_root}/workspaces"
 
 # 工作环境配置

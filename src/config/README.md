@@ -69,7 +69,7 @@ max_turns: 6
 | 配置项 | 类型 | 默认值 | 说明 |
 |--------|------|--------|------|
 | `paths.project_root` | string | - | 项目根目录路径 |
-| `paths.framework_root` | string | `${paths.project_root}/mas_aider` | 框架根目录路径 |
+| `paths.framework_root` | string | `${paths.project_root}/src` | 框架根目录路径 |
 | `paths.workspace_root` | string | `${paths.project_root}/workspaces` | 工作区根目录路径 |
 
 ### 环境配置 (environment)
@@ -135,18 +135,18 @@ paths:
 系统按以下顺序自动查找配置文件：
 
 1. `project_root/config.json`
-2. `project_root/mas_aider/config.json`
+2. `project_root/src/config.json`
 3. `project_root/config.yaml`
 4. `project_root/config.yml`
-5. `project_root/mas_aider/config.yaml`
-6. `project_root/mas_aider/config.yml`
+5. `project_root/src/config.yaml`
+6. `project_root/src/config.yml`
 
 ## 🚀 使用方法
 
 ### 自动加载
 
 ```python
-from mas_aider.config import AppConfig
+from src.config import AppConfig
 
 # 自动查找并加载配置文件
 config = AppConfig.load()
@@ -156,7 +156,7 @@ config = AppConfig.load()
 
 ```python
 from pathlib import Path
-from mas_aider.config import AppConfig
+from src.config import AppConfig
 
 # 指定特定配置文件
 config_path = Path("/path/to/custom/config.json")

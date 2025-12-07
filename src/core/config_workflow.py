@@ -151,7 +151,7 @@ class ConfigWorkflow(BaseWorkflow):
 
     def _find_config_file(self) -> Optional[Path]:
         """查找配置文件"""
-        # 从项目根目录查找 (mas_aider目录)
+        # 从项目根目录查找 (src目录)
         project_root = Path(__file__).parent.parent
 
         # 可能的配置文件位置（优先workflow package）

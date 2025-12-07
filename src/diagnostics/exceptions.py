@@ -133,4 +133,4 @@ def timeout_error(message: str, **context) -> TimeoutError:
 
 
 # 异常处理装饰器已移至 decorators 包
-# 如需使用，请从 mas_aider.decorators 导入
+# 如需使用，请从 src.decorators 导入

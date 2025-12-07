@@ -7,9 +7,9 @@ import sys
 from pathlib import Path
 
 # 添加父目录到路径，以便导入模块
-sys.path.insert(0, str(Path(__file__).parent.parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from mas_aider.services.evaluators.condition_evaluator import UnifiedConditionEvaluator
+from src.services.evaluators.condition_evaluator import UnifiedConditionEvaluator
 
 
 class TestConditionEvaluator(unittest.TestCase):

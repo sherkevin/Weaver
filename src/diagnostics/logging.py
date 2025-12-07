@@ -13,7 +13,7 @@ class WorkflowLogger:
 
     _instance: Optional['WorkflowLogger'] = None
 
-    def __init__(self, name: str = "mas_aider", level: str = "INFO"):
+    def __init__(self, name: str = "fastants", level: str = "INFO"):
         """
         初始化日志器
 

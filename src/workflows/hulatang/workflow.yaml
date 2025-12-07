@@ -4,7 +4,7 @@
 name: "hulatang"
 description: "胡辣汤宣传PPT制作工作流：自然对话协作，生成HTML PPT"
 initial_message: "制作一份关于胡辣汤的宣传PPT"
-max_turns: 10  # 增加轮次，支持更多交互
+max_turns: 10  
 
 # Agent定义
 agents:
@@ -20,65 +20,50 @@ states:
     agent: "client"
     start: true
     prompt: |
-      你是甲方（需求方）。
-
-      任务目标：{{initial_message}}
-
+      【system prompt】：{{COLLABORATION_GUIDE}}
+      【role】：你是甲方（需求方）。
+      【任务目标】：{{initial_message}}
+      【instruction】：
       {% if last_agent_name == "supplier" %}
-      ## 乙方提出了问题和建议
-
-      乙方说：{{last_agent_content}}
-
-      请回答乙方的问题，并更新需求文档：
-      - 在 `collab/client_requirements.md` 中记录你的回答和更新后的需求
-      - 直接回答乙方的问题
-      - 如果需求有调整，也更新到文档中
-
+      ## 乙方提出了问题和建议：{{last_agent_content}}
+      你需要根据乙方的回复来更新需求文档
       {% else %}
       请提出你的需求，并创建需求文档：
-      - 在 `collab/client_requirements.md` 中详细记录你的需求
-      - 包括：PPT主题、页面数量、风格要求、重点内容、特殊要求等
-
+      - 包括：PPT主题、页面数量、风格要求、重点内容、特殊要求
       {% endif %}
-
-      {{COLLABORATION_GUIDE}}
-
-      **决策字段 (Decisions)**：
+      【decisions字段说明】：
       {
-        "decisions": {}
+        "decisions": {
+          "request_complete": true // [boolean]：true: 需求描述已完成，准备好与乙方讨论；false: 还需要继续补充需求
+        }
       }
 
     transitions:
       - to: "supplier_discuss"
-        condition: "true"
+        condition: "request_complete"
 
   # 状态2：乙方讨论方案（新增商议环节）
   - name: "supplier_discuss"
     agent: "supplier"
     prompt: |
-      你是乙方（开发者/设计师）。
-
+      【system prompt】：{{COLLABORATION_GUIDE}}
+      【role】：你是乙方（开发者/设计师）。
+      【任务目标】：与甲方讨论PPT设计方案，确认需求细节。
+      【instruction】：
       甲方说：{{last_agent_content}}
-
-      请与甲方讨论PPT的设计方案：
-      - 提出你的设计思路和建议
-      - 询问不确定的地方
-      - 讨论技术实现方案（HTML PPT的结构、样式、交互等）
-      - 确认关键细节
-
-      **关键**：
-      - 如果甲方明确表示“方案通过”或“开始制作”，或者你认为需求已经足够清晰，请务必将 `design_confirmed` 和 `ready_to_build` 设置为 true，以便进入制作阶段。
-      - 不要陷入无休止的讨论。
-
-      如果需要记录设计方案，在 `collab/` 目录创建相关文档。
-
-      {{COLLABORATION_GUIDE}}
-
-      **决策字段 (Decisions)**：
+      请执行以下操作：
+      1. **分析需求**：确认主题、风格、页数等关键信息。
+      2. **提出方案**：简述你的设计思路（结构、配色、交互）。
+      3. **确认细节**：询问不明确的地方。
+      【decisions字段说明】：
       {
         "decisions": {
-          "design_confirmed": false,  // 设计方案是否已确认
-          "ready_to_build": false     // 是否可以开始制作
+          "design_confirmed": false,  // [必填] boolean
+                                      // true: 双方已达成一致，方案已确认。
+                                      // false: 还需要继续讨论。
+          "ready_to_build": false     // [必填] boolean
+                                      // true: 已具备开发所需的所有信息，可以开始编码。
+                                      // false: 信息不足，暂不能开始。
         }
       }
 
@@ -92,66 +77,53 @@ states:
   - name: "client_discuss"
     agent: "client"
     prompt: |
-      你是甲方。
-
+      【system prompt】：{{COLLABORATION_GUIDE}}
+      【role】：你是甲方。
+      【任务目标】：回复乙方问题，确认设计方案。
+      【instruction】：
       乙方说：{{last_agent_content}}
 
-      请回复乙方的问题并确认方案：
-      - 回答乙方的问题
-      - 表达你的想法和偏好
-      - 确认或调整方案
-      - 提出你的建议
+      请执行以下操作：
+      1. 回答乙方的问题。
+      2. 确认或调整方案。
+      3. 如果乙方的方案基本符合要求，请明确回复“方案通过，请开始制作”，以推进项目进度。
+      4. 如果需要更新需求，需要更新需求文档并在返回的content中明确说明
 
-      **关键**：
-      - 如果乙方的方案基本符合要求，请明确回复“方案通过，请开始制作”，不要纠结过多细节，以推进项目进度。
-      - 只有在方案有重大缺陷时才继续讨论。
-
-      如果需要更新需求，在 `collab/client_requirements.md` 中记录调整。
-
-      {{COLLABORATION_GUIDE}}
-
-      **决策字段 (Decisions)**：
+      【decisions字段说明】：
       {
         "decisions": {
-            "approve_design": true  // 如果同意方案，请设为true
+            "approve_design": true  // [必填] boolean
+                                    // true: 同意当前设计方案，允许乙方开始制作。
+                                    // false: 不同意，需要继续修改或讨论。
         }
       }
 
     transitions:
+      - to: "supplier_create"
+        condition: "approve_design"
       - to: "supplier_discuss"
-        condition: "true"
+        condition: "NOT approve_design"
 
   # 状态4：乙方制作HTML PPT（核心修改）
   - name: "supplier_create"
     agent: "supplier"
     prompt: |
-      你是乙方（开发者）。
-
-      经过讨论，方案已确认。之前的对话：
-      {{last_agent_content}}
-
-      **你的任务：制作HTML PPT并创建交付物**
-
-      1. **创建HTML文件**：在 `collab/` 目录创建 `hulatang_ppt.html`
-      2. **实现PPT功能**：
-         - 使用HTML + CSS + JavaScript
-         - 支持幻灯片切换（键盘方向键/鼠标点击）
-         - 响应式设计，适配不同屏幕
-         - 美观的视觉效果和动画
-      3. **内容要求**：
-         - 根据甲方需求制作内容
-         - 包含封面、内容页（至少5-8页）、结尾页
-         - 突出胡辣汤的特色（历史、食材、制作、文化等）
-      4. **创建使用说明**：在 `collab/` 创建 `README.md`
-
-      {{COLLABORATION_GUIDE}}
-
-      **决策字段 (Decisions)**：
+      【system prompt】：{{COLLABORATION_GUIDE}}
+      【role】：你是乙方（开发者）。
+      【任务目标】：制作HTML PPT并创建交付物。
+      【instruction】：
+       之前的对话：{{last_agent_content}}。经过讨论，方案已确认，现在可以根据设计文档来进行开发。
+      【decisions字段说明】：
       {
         "decisions": {
-          "html_created": true,
-          "ppt_complete": true,
-          "quality_score": 8
+          "html_created": true,    // [必填] boolean
+                                   // true: index.html 文件已成功创建。
+                                   // false: 文件尚未创建。
+          "ppt_complete": true,    // [必填] boolean
+                                   // true: PPT 的所有功能和内容已开发完成。
+                                   // false: 还在开发中。
+          "quality_score": 8       // [可选] number (1-10)
+                                   // 自评代码质量分数。
         }
       }
 
@@ -166,25 +138,26 @@ states:
   - name: "client_review"
     agent: "client"
     prompt: |
-      你是甲方。
-
+      【system prompt】：{{COLLABORATION_GUIDE}}
+      【role】：你是甲方。
+      【任务目标】：评审PPT效果并给出反馈。
+      【instruction】：
       乙方说：{{last_agent_content}}
-      
-      请打开 `collab/hulatang_ppt.html` 查看PPT效果，然后给出反馈：
-      - 是否符合需求
-      - 哪些地方满意
-      - 哪些地方需要改进
-      
-      用自然对话的方式表达，就像给同事反馈一样。
-      
-      {{COLLABORATION_GUIDE}}
-
-      **决策字段 (Decisions)**：
+      请打开html文件查看PPT效果，然后给出反馈：
+      1. 检查功能是否正常（翻页、动画）。
+      2. 检查内容是否符合需求。
+      3. 给出具体的修改建议或批准通过。
+      【decisions字段说明】：
       {
         "decisions": {
-          "satisfaction_score": 7,   // 满意度 1-10
-          "needs_revision": true,    // 是否需要修改
-          "approved": false          // 是否通过
+          "satisfaction_score": 7,   // [必填] number (1-10)
+                                     // 满意度评分。如果 >= 8，流程可能结束。
+          "needs_revision": true,    // [必填] boolean
+                                     // true: 需要乙方修改。
+                                     // false: 不需要修改。
+          "approved": false          // [必填] boolean
+                                     // true: 最终通过，项目结束。
+                                     // false: 尚未通过。
         }
       }
 
@@ -198,24 +171,23 @@ states:
   - name: "supplier_revise"
     agent: "supplier"
     prompt: |
-      你是乙方。
-
+      【system prompt】：{{COLLABORATION_GUIDE}}
+      【role】：你是乙方。
+      【任务目标】：根据反馈修改PPT。
+      【instruction】：
       甲方说：{{last_agent_content}}
-      
-      请根据反馈修改 `collab/hulatang_ppt.html`：
-      - 解决提出的问题
-      - 改进不足之处
-      - 保持代码质量
-      
-      直接修改HTML文件，不要只描述。
-      
-      {{COLLABORATION_GUIDE}}
-
-      **决策字段 (Decisions)**：
+      请根据反馈修改html文件：
+      1. 逐条解决甲方提出的问题。
+      2. 优化代码和视觉效果。
+      3. 修改完成后，请简要汇报修改内容。
+      【decisions字段说明】：
       {
         "decisions": {
-          "revision_complete": true,
-          "quality_improved": 9
+          "revision_complete": true, // [必填] boolean
+                                     // true: 修改工作已全部完成。
+                                     // false: 还在修改中。
+          "quality_improved": 9      // [可选] number (1-10)
+                                     // 修改后的质量评分。
         }
       }
 

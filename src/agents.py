@@ -7,11 +7,14 @@ from aider.io import InputOutput
 class AiderAgentFactory:
     def __init__(self, model_name="openai/glm-4.6", api_base=None):
         self.model_name = model_name
-        import os
-        if api_base:
-            os.environ["OPENAI_BASE_URL"] = api_base
+        self.api_base = api_base
+        
+        # 移除全局环境变量修改
+        # if api_base:
+        #     os.environ["OPENAI_BASE_URL"] = api_base
 
         # 创建Model实例
+        # 注意：如果需要支持不同的api_base，可能需要在这里或create_coder中动态配置Model
         self.model = Model(model_name)
 
         # 修改Aider的默认request_timeout从600秒增加到1800秒（30分钟）
@@ -50,10 +53,13 @@ class AiderAgentFactory:
         history_file = root_path / f".aider.chat.history.md"
 
         # 2. 配置 IO
+        # 关键修复：设置 input=None 以禁用标准输入，防止在非交互模式下挂起
         io = InputOutput(
             yes=True,                       # 自动确认
             chat_history_file=history_file, # 关键：指定历史记录文件
             input_history_file=root_path / ".aider.input.history",
+            input=None,                     # 禁用 stdin 读取
+            output=None                     # 保持 stdout 输出
         )
 
         # 3. 根据type获取对应的 Coder 类
@@ -64,7 +70,7 @@ class AiderAgentFactory:
             main_model=self.model,
             io=io,
             fnames=fnames,  # 现在是绝对路径
-            verbose=False,  # 关键：开启详细模式，出错时能看到原因
+            verbose=True,   # 关键：开启详细模式，出错时能看到原因
             **kwargs        # 透传其他参数，如 edit_format="whole"
         )
         return coder

@@ -222,6 +222,11 @@ class LangGraphEngine:
                 self.logger.info("🏁 Global exit condition met, routing to END")
                 return "END"
             
+            # 检查决策是否为空（防止死循环或无效状态）
+            if not state.get("decisions"):
+                self.logger.warning("🛑 Decisions are empty, routing to END")
+                return "END"
+            
             # 提取Agent上下文
             context = extract_agent_context(state)
             agent_response = context["agent_response"]

@@ -16,7 +16,7 @@ from .diagnostics.logging import get_logger
 from .decorators.error_handlers import workflow_execution_error_handler
 
 
-class MasAiderSession:
+class FastAntsSession:
     """
     持久化会话管理器
     保持 Service 和 Agent 在内存中存活，允许连续运行多个工作流
@@ -42,7 +42,7 @@ class MasAiderSession:
         # 3. 跟踪活跃的工作流
         self.active_workflows: set[str] = set()
 
-        self.logger.info("🚀 MasAider Session Initialized (Agents are alive)")
+        self.logger.info("🚀 FastAnts Session Initialized (Agents are alive)")
         self.logger.info(f"📊 Session ID: {id(self)}")
 
     @workflow_execution_error_handler
@@ -179,12 +179,12 @@ def main(workflow_name: str = "collaboration"):
     单次运行入口 (兼容旧代码)
 
     注意：这种方式运行结束后，Agent 依然会被销毁。
-    如果要 Keep-Alive，请在外部脚本使用 MasAiderSession 类。
+    如果要 Keep-Alive，请在外部脚本使用 FastAntsSession 类。
 
     Args:
         workflow_name: 工作流名称
     """
-    session = MasAiderSession()
+    session = FastAntsSession()
     session.run_workflow(workflow_name)
 
 
@@ -216,7 +216,7 @@ if __name__ == "__main__":
             workflow_name = sys.argv[2]
             main(workflow_name)
         else:
-            print("Usage: python -m mas_aider.main [--list | --run <workflow_name>]")
+            print("Usage: python -m src.main [--list | --run <workflow_name>]")
             print("Available workflow types: collaboration, hulatang")
     else:
         main("collaboration")  # 默认运行 collaboration

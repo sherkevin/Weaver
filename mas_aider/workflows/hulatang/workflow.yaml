@@ -1,0 +1,243 @@
+# 胡辣汤PPT制作工作流 - 自然对话协作模式
+# 甲方提出需求，双方讨论方案，乙方制作HTML PPT，甲方评审反馈
+
+name: "hulatang"
+description: "胡辣汤宣传PPT制作工作流：自然对话协作，生成HTML PPT"
+initial_message: "制作一份关于胡辣汤的宣传PPT"
+max_turns: 10  # 增加轮次，支持更多交互
+
+# Agent定义
+agents:
+  - name: "client"
+    type: "coder"
+  - name: "supplier"
+    type: "coder"
+
+# 状态机定义
+states:
+  # 状态1：甲方提出需求（自然对话）
+  - name: "client_request"
+    agent: "client"
+    start: true
+    prompt: |
+      你是甲方（需求方）。
+
+      任务目标：{{initial_message}}
+
+      {% if last_agent_name == "supplier" %}
+      ## 乙方提出了问题和建议
+
+      乙方说：{{last_agent_content}}
+
+      请回答乙方的问题，并更新需求文档：
+      - 在 `collab/client_requirements.md` 中记录你的回答和更新后的需求
+      - 直接回答乙方的问题
+      - 如果需求有调整，也更新到文档中
+
+      {% else %}
+      请提出你的需求，并创建需求文档：
+      - 在 `collab/client_requirements.md` 中详细记录你的需求
+      - 包括：PPT主题、页面数量、风格要求、重点内容、特殊要求等
+
+      {% endif %}
+
+      **重要**：先创建/更新文件，然后用JSON格式回复你的操作结果。
+
+      {{COLLABORATION_GUIDE}}
+
+      **回复格式（严格的JSON）**：
+      {
+        "content": "我已经创建了需求文档" 或 "我已经回答了问题并更新了需求文档",
+        "decisions": {}
+      }
+
+      **注意**：回复必须是JSON格式，不要包含文件内容！
+
+    transitions:
+      - to: "supplier_discuss"
+        condition: "true"
+
+  # 状态2：乙方讨论方案（新增商议环节）
+  - name: "supplier_discuss"
+    agent: "supplier"
+    prompt: |
+      你是乙方（开发者/设计师）。
+
+      甲方说：{{last_agent_content}}
+
+      请与甲方讨论PPT的设计方案：
+      - 提出你的设计思路和建议
+      - 询问不确定的地方
+      - 讨论技术实现方案（HTML PPT的结构、样式、交互等）
+      - 确认关键细节
+
+      如果需要记录设计方案，在 `collab/` 目录创建相关文档。
+
+      {{COLLABORATION_GUIDE}}
+
+      **回复格式（严格的JSON）**：
+      {
+        "content": "我提出了设计方案，询问了XXX问题",
+        "decisions": {
+          "design_confirmed": false,  // 设计方案是否已确认
+          "ready_to_build": false     // 是否可以开始制作
+        }
+      }
+
+      **注意**：回复必须是JSON格式，不要包含文件内容！
+
+    transitions:
+      - to: "client_discuss"
+        condition: "NOT (design_confirmed AND ready_to_build)"
+      - to: "supplier_create"
+        condition: "design_confirmed AND ready_to_build"
+
+  # 状态3：甲方参与讨论（新增）
+  - name: "client_discuss"
+    agent: "client"
+    prompt: |
+      你是甲方。
+
+      乙方说：{{last_agent_content}}
+
+      请回复乙方的问题并确认方案：
+      - 回答乙方的问题
+      - 表达你的想法和偏好
+      - 确认或调整方案
+      - 提出你的建议
+
+      如果需要更新需求，在 `collab/client_requirements.md` 中记录调整。
+
+      {{COLLABORATION_GUIDE}}
+
+      **回复格式（严格的JSON）**：
+      {
+        "content": "我回答了问题，确认了方案",
+        "decisions": {}
+      }
+
+      **注意**：回复必须是JSON格式，不要包含文件内容！
+
+    transitions:
+      - to: "supplier_discuss"
+        condition: "true"
+
+  # 状态4：乙方制作HTML PPT（核心修改）
+  - name: "supplier_create"
+    agent: "supplier"
+    prompt: |
+      **⚠️ 重要：你必须以JSON格式回复**
+
+      你是乙方（开发者）。
+
+      经过讨论，方案已确认。之前的对话：
+      {{last_agent_content}}
+
+      **你的任务：制作HTML PPT并创建交付物**
+
+      1. **创建HTML文件**：在 `collab/` 目录创建 `hulatang_ppt.html`
+      2. **实现PPT功能**：
+         - 使用HTML + CSS + JavaScript
+         - 支持幻灯片切换（键盘方向键/鼠标点击）
+         - 响应式设计，适配不同屏幕
+         - 美观的视觉效果和动画
+      3. **内容要求**：
+         - 根据甲方需求制作内容
+         - 包含封面、内容页（至少5-8页）、结尾页
+         - 突出胡辣汤的特色（历史、食材、制作、文化等）
+      4. **创建使用说明**：在 `collab/` 创建 `README.md`
+
+      **重要**：先创建文件，然后用JSON格式回复结果描述。
+
+      {{COLLABORATION_GUIDE}}
+
+      **回复格式（严格的JSON）**：
+      {
+        "content": "我已经创建了HTML PPT文件和使用说明",
+        "decisions": {
+          "html_created": true,
+          "ppt_complete": true,
+          "quality_score": 8
+        }
+      }
+
+      **注意**：回复必须是JSON格式，不要包含文件内容！
+
+    transitions:
+      - to: "client_review"
+        condition: "html_created AND ppt_complete"
+      - to: "supplier_create"  # 如果未完成，继续制作
+        condition: "NOT (html_created AND ppt_complete)"
+
+
+  # 状态5：甲方评审
+  - name: "client_review"
+    agent: "client"
+    prompt: |
+      你是甲方。
+
+      乙方说：{{last_agent_content}}
+      
+      请打开 `collab/hulatang_ppt.html` 查看PPT效果，然后给出反馈：
+      - 是否符合需求
+      - 哪些地方满意
+      - 哪些地方需要改进
+      
+      用自然对话的方式表达，就像给同事反馈一样。
+      
+      {{COLLABORATION_GUIDE}}
+
+      回复格式（严格的JSON）：
+      {
+        "content": "你的评审反馈（自然对话）",
+        "decisions": {
+          "satisfaction_score": 7,   // 满意度 1-10
+          "needs_revision": true,    // 是否需要修改
+          "approved": false          // 是否通过
+        }
+      }
+
+    transitions:
+      - to: "supplier_revise"
+        condition: "needs_revision AND satisfaction_score < 8 AND NOT approved"
+      - to: "END"
+        condition: "approved OR satisfaction_score >= 8"
+
+  # 状态6：乙方修改
+  - name: "supplier_revise"
+    agent: "supplier"
+    prompt: |
+      你是乙方。
+
+      甲方说：{{last_agent_content}}
+      
+      请根据反馈修改 `collab/hulatang_ppt.html`：
+      - 解决提出的问题
+      - 改进不足之处
+      - 保持代码质量
+      
+      直接修改HTML文件，不要只描述。
+      
+      {{COLLABORATION_GUIDE}}
+
+      回复格式（严格的JSON）：
+      {
+        "content": "修改说明：我修改了X，解决了Y问题...",
+        "decisions": {
+          "revision_complete": true,
+          "quality_improved": 9
+        }
+      }
+
+    transitions:
+      - to: "client_review"
+        condition: "revision_complete"
+      - to: "supplier_revise"  # 如果未完成，继续修改
+        condition: "NOT revision_complete"
+
+# 全局退出条件
+exit_conditions:
+  - condition: "max_turns_exceeded"
+    action: "force_end"
+  - condition: "error_occurred"
+    action: "save_and_end"

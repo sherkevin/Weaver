@@ -81,18 +81,13 @@ class AgentService:
         self._ensure_git_initialized(root_path, agent_name)
 
         # 3. 创建Agent实例
-        # 临时切换CWD以确保Aider正确识别Git根目录
-        original_cwd = os.getcwd()
-        try:
-            os.chdir(root_path)
-            agent = self._agent_factory.create_coder(
-                root_path=root_path,
-                fnames=fnames_list,
-                agent_name=agent_name,
-                type=agent_type
-            )
-        finally:
-            os.chdir(original_cwd)
+        # 不再切换CWD，而是依赖AiderAgentFactory正确处理路径
+        agent = self._agent_factory.create_coder(
+            root_path=root_path,
+            fnames=fnames_list,
+            agent_name=agent_name,
+            type=agent_type
+        )
 
         # 4. 存入缓存
         self._active_agents[cache_key] = agent
@@ -117,10 +112,9 @@ class AgentService:
         收集Agent需要感知的文件列表
         包括agent_root下的文件和collab_dir下的文件（通过软链路径）
         """
-        fnames_list = [
-            str(agent_root),
-            str(agent_root / "collab"),
-        ]
+        # 关键修复：不要将 agent_root 本身加入文件列表，这会让 Aider 认为根目录是可编辑的
+        # 也不要将 agent_root/collab 目录本身加入，只加入具体文件
+        fnames_list = []
 
         # 1. 收集agent_root下的文件（排除collab，避免重复或死循环）
         # 注意：rglob("*") 会递归遍历所有子目录，包括软链指向的目录（如果 follow_symlinks=True，默认是 False 但行为取决于 OS）
