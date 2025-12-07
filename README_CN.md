@@ -472,7 +472,7 @@ WorkflowResult(
 
 ## 🤝 贡献
 
-我们欢迎贡献！请查看我们的[贡献指南](CONTRIBUTING.md)了解详情。
+我们欢迎贡献！请查看我们的[贡献指南](docs/CONTRIBUTING.md)了解详情。
 
 ### 开发环境设置
 
