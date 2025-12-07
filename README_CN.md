@@ -520,8 +520,6 @@ pip install -r src/requirements.txt
 
 <div align="center">
 
-**由 Weaver 团队用 ❤️ 制作**
-
 [报告Bug](https://github.com/sherkevin/Weaver/issues) • [请求功能](https://github.com/sherkevin/Weaver/issues) • [文档](docs/)
 
 </div>

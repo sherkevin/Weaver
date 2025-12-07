@@ -521,8 +521,6 @@ If you find this project useful, please consider giving it a star! ⭐
 
 <div align="center">
 
-**Made with ❤️ by the Weaver Team**
-
 [Report Bug](https://github.com/sherkevin/Weaver/issues) • [Request Feature](https://github.com/sherkevin/Weaver/issues) • [Documentation](docs/)
 
 </div>
