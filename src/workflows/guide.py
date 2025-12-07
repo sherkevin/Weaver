@@ -18,21 +18,32 @@ COLLABORATION_GUIDE = """
 - 信息输入：你在collab目录下可以看到所有其他协作者的文档和代码，当你收到instruction时可以先查看collab里的文件找到你需要的文档信息。
 - 信息输出：当你接受instruction需要完成任务时，成果也都放在collab下以供协作者使用。
 
-### 4. 严格输出格式
-在完成交给你的产出后（例如在collab下增删查改文档和代码，自己在个人区下完成了自己的思考），需要按照下面的JSON格式进行回复：
+### 4. 交互协议
+- **输入（Instruction）**：你收到的 instruction 中的对话内容（如“甲方说：...”）是上一位协作者回复中的 `content` 字段内容。这是你的具体任务指令。
+- **输出（Response）**：作为任务分发者和执行者，你的回复必须包含两部分：
+  1. **行动/回复内容**：你可以正常输出自然语言回复，或者使用标准的文件列表格式（file listing format）来创建/修改文件。
+  2. **决策块（JSON）**：在回复的**最后**，必须附加一个JSON对象来告知系统你的决策状态。
+
+### 5. 决策块格式（必须包含）
+无论你回复了什么内容（即使只是询问问题或请求更多文件），你**必须**在回复的末尾包含一个JSON对象。格式如下：
+
 ```json
 {
-  "content": "",
+  "content": "简要总结你的回复内容，或者引用你创建的文件路径",
   "decisions": {
     "key_decision_1": true,
     "key_decision_2": false
   }
 }
 ```
+
 **注意**：
-- 每次返回必须是json结构，包含content和decision字段
-- content的内容是简要描述你做了什么和增删查改的文件地址，例如：我生成了设计文档collab/design.md；我纠正了collab/src/index.html的逻辑错误；我生成了全局config配置文件collab/src/config.py
-- key_decision是进行状态跳转的关键字段，在具体任务中会有具体名称和含义说明
+- **位置**：JSON块必须放在回复的最后。
+- **兼容性**：你可以（并且应该）在JSON块之前输出文件修改代码块或自然语言文本。不要因为输出了文件就省略JSON。
+- **字段要求**：
+  - `content`：必填。简述你做了什么。
+  - `decisions`：必填。必须包含当前状态要求的所有决策字段（布尔或数字）。
+- **强制性**：如果没有这个JSON块，工作流将无法推进。如果你需要等待对方回复，请在decisions中设置相应的状态（例如 `request_complete: false` 或 `design_confirmed: false`）。
 """
 
 # 导出常量供模板使用
