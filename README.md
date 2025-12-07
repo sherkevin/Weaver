@@ -140,12 +140,16 @@ paths:
 # List available workflows
 python -m src.main --list
 
-# Run a specific workflow
+# Run a specific workflow (hulatang is a demo case: PPT creation workflow)
 python -m src.main --run hulatang
 
 # Run default workflow
 python -m src.main
 ```
+
+**Workflow Config File Location:** `src/workflows/{workflow_name}/workflow.yaml`
+
+For example, the `hulatang` workflow config is located at: `src/workflows/hulatang/workflow.yaml`
 
 #### Option 2: Python Script (Keep-Alive Session) ⭐ Recommended
 
@@ -306,13 +310,19 @@ exit_conditions:
 
 > 📖 **For detailed workflow engineering guide, see [Workflow Development Guide](docs/WORKFLOW_GUIDE.md)**
 
-### Step 1: Create Workflow Directory
+### Step 1: Create Workflow Directory and Config File
+
+Workflow config files must be located at: `src/workflows/{workflow_name}/workflow.yaml`
 
 ```bash
+# Create workflow directory
 mkdir -p src/workflows/my_workflow
+
+# Create config file
+touch src/workflows/my_workflow/workflow.yaml
 ```
 
-### Step 2: Create `workflow.yaml`
+### Step 2: Write `workflow.yaml`
 
 Define your workflow following the example above. Key components:
 
@@ -338,12 +348,22 @@ class MyWorkflowRouter(BaseRouter):
 
 ### Step 4: Run Your Workflow
 
+**Option 1: Command Line**
+
+```bash
+python -m src.main --run my_workflow
+```
+
+**Option 2: Python Script**
+
 ```python
 from src.main import FastAntsSession
 
 with FastAntsSession() as session:
     result = session.run_workflow("my_workflow")
 ```
+
+**Note:** The workflow name (`my_workflow`) must match the directory name where the config file is located.
 
 ---
 
@@ -401,6 +421,10 @@ Check that `OPENAI_API_KEY` is correctly set in `.env` file or environment varia
 ### Workflow Config Not Found
 
 Ensure workflow config file is located at `src/workflows/{workflow_name}/workflow.yaml`.
+
+For example, to run the `hulatang` workflow, the config file path should be: `src/workflows/hulatang/workflow.yaml`
+
+Run command: `python -m src.main --run hulatang`
 
 ### Agent Execution Failed
 

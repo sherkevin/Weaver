@@ -140,12 +140,16 @@ paths:
 # 列出可用的工作流
 python -m src.main --list
 
-# 运行指定工作流
+# 运行指定工作流（hulatang 是一个演示案例：PPT制作工作流）
 python -m src.main --run hulatang
 
 # 运行默认工作流
 python -m src.main
 ```
+
+**工作流配置文件位置：** `src/workflows/{workflow_name}/workflow.yaml`
+
+例如，`hulatang` 工作流的配置文件位于：`src/workflows/hulatang/workflow.yaml`
 
 #### 方式二：Python脚本（Keep-Alive会话）⭐ 推荐
 
@@ -305,13 +309,19 @@ exit_conditions:
 
 > 📖 **详细的工作流工程指南，请参见 [工作流开发指南](docs/WORKFLOW_GUIDE_CN.md)**
 
-### 步骤1：创建工作流目录
+### 步骤1：创建工作流目录和配置文件
+
+工作流配置文件必须位于：`src/workflows/{workflow_name}/workflow.yaml`
 
 ```bash
+# 创建工作流目录
 mkdir -p src/workflows/my_workflow
+
+# 创建配置文件
+touch src/workflows/my_workflow/workflow.yaml
 ```
 
-### 步骤2：创建 `workflow.yaml`
+### 步骤2：编写 `workflow.yaml`
 
 按照上面的示例定义您的工作流。关键组件包括：
 
@@ -337,12 +347,22 @@ class MyWorkflowRouter(BaseRouter):
 
 ### 步骤4：运行您的工作流
 
+**方式一：命令行运行**
+
+```bash
+python -m src.main --run my_workflow
+```
+
+**方式二：Python脚本运行**
+
 ```python
 from src.main import FastAntsSession
 
 with FastAntsSession() as session:
     result = session.run_workflow("my_workflow")
 ```
+
+**注意：** 工作流名称（`my_workflow`）必须与配置文件所在目录名称一致。
 
 ---
 
@@ -400,6 +420,10 @@ WorkflowResult(
 ### 工作流配置未找到
 
 确保工作流配置文件位于 `src/workflows/{workflow_name}/workflow.yaml`。
+
+例如，要运行 `hulatang` 工作流，配置文件路径应该是：`src/workflows/hulatang/workflow.yaml`
+
+运行命令：`python -m src.main --run hulatang`
 
 ### Agent执行失败
 
